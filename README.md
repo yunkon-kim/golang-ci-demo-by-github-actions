@@ -1,6 +1,6 @@
 # Golang CI Demo by GitHub Actions
 
-According to [Atlassian](https://www.atlassian.com/), *Continuous Integration (CI) is the practice of automating the integration of code changes from multiple contributors into a single software project.*
+> Continuous Integration (CI) is the practice of automating the integration of code changes from multiple contributors into a single software project. - *[Atlassian](https://www.atlassian.com/)*
 
 CI is specially mandatory for open source projects to automate the integration of all code changes because several maintainers couldn't handle all contributions one by one.
 
