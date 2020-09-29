@@ -64,13 +64,16 @@ on:
 jobs:
   build:
   
-    # Job name is Build
+    # Job name is "Build"
     name: Build
     
-    # this job runs on Linux (Ubuntu-latest)
+    # This job runs on Ubuntu-latest
     runs-on: ubuntu-latest
     
     steps:
+      # This action sets up a go environment for use in actions by:
+      #     optionally downloading and caching a version of Go by version and adding to PATH
+      #     registering problem matchers for error output
       # This step uses GitHub's setup-go: https://github.com/actions/setup-go
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
@@ -78,6 +81,7 @@ jobs:
           go-version: ^1.13
         id: go
         
+      # This action checks-out your repository under $GITHUB_WORKSPACE, so your workflow can access it.
       # This step uses GitHub's checkout: https://github.com/actions/checkout
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
