@@ -104,7 +104,7 @@ jobs:
         run: go test -v .
 ```
 
-## Demonstaration steps
+## Demonstration steps
 1. Fork this repository
 2. Create a branch
 3. Modify `calc.go`
