@@ -62,7 +62,10 @@ on:
     branches: [ $default-branch ]
 
 jobs:
-  build:
+  # Set the job key. The key is displayed as the job name
+  # when a job name is not provided
+  # The job key is "ci-demo"
+  ci-demo:
   
     # Job name is "Build"
     name: Build
