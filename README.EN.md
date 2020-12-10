@@ -1,3 +1,5 @@
+*Read this in other languages: [한국어](https://github.com/cloud-barista/cb-larva/blob/master/README.md), [English](https://github.com/cloud-barista/cb-larva/blob/master/README.EN.md)*
+
 # Golang CI Demo by GitHub Actions
 
 > Continuous Integration (CI) is the practice of automating the integration of code changes from multiple contributors into a single software project. - *[Atlassian](https://www.atlassian.com/)*
