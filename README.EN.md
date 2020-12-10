@@ -1,4 +1,4 @@
-*Read this in other languages: [한국어](https://github.com/cloud-barista/cb-larva/blob/master/README.md), [English](https://github.com/cloud-barista/cb-larva/blob/master/README.EN.md)*
+*Read this in other languages: [한국어](https://github.com/hermitkim1/golang-ci-demo-by-github-actions/blob/master/README.md), [English](https://github.com/hermitkim1/golang-ci-demo-by-github-actions/blob/master/README.EN.md)*
 
 # Golang CI Demo by GitHub Actions
 
