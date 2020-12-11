@@ -4,15 +4,37 @@
 
 > (번역) CI (Continuous Integration)는 여러 기여자의 코드 변경 사항을 단일 소프트웨어 프로젝트로 통합하는 것을 자동화하는 방법입니다. - *[Atlassian](https://www.atlassian.com/)*
 
-코드 변경 사항 통합을 자동화 하기 위하여 CI는 오픈소스 프로젝트에 꼭 적용해야합니다. 몇 명의 메인테이너(Maintainer)들이 모든 컨트리뷰션(Contribution)을 일일히 대응하기 어렵기 때문입니다. 
+오픈소스 프로젝트에서 여러 컨트리뷰터(Contributor)가 함께 소프트웨어를 만들어 갑니다. 여러 사람이 기능 개선을 위해 소스코드를 수정하는데 몇 명의 메인테이너(Maintainer)들이 모든 컨트리뷰션(Contribution)을 일일히 대응하는 것은 어렵습니다. 따라서, 소스코드 통합을 자동화하는 CI는 오픈소스 프로젝트에 없어서는 안될 매우 중요한 요소 입니다.
 
-**"GitHub Actions"은** 여러분의 (공공) 저장소에 CI 적용하기 위해 큰 도움이 될 것이라고 생각합니다. 무료라서 좋네요 :smile:
+먼저, CI 관련 개념을 설명한 후, **"GitHub Actions"를** 활용하여 Golang CI 하는 방법을 설명하겠습니다. Golang에 CI 적용할 때 도움이 되기를 바랍니다. 
+
+GitHub Actions가 무료라서 좋네요 :smile:
 
 ## CI 관련 개념 설명
-GitHub Actions을 활용한 Golang CI를 시작하기에 앞서 몇가지 개념을 설명하고자 합니다. 모두 아는 내용이라면 Jump to [GitHub Actions을 통한 Golang CI 시작하기](https://github.com/hermitkim1/golang-ci-demo-by-github-actions#github-actions%EC%9D%84-%ED%86%B5%ED%95%9C-golang-ci-%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0) :wink:
+GitHub Actions을 활용한 Golang CI를 시작하기에 앞서 몇가지 개념을 설명하고자 합니다.   
+(모두 아는 내용이라면 **Jump to [GitHub Actions을 통한 Golang CI 시작하기](https://github.com/hermitkim1/golang-ci-demo-by-github-actions#github-actions%EC%9D%84-%ED%86%B5%ED%95%9C-golang-ci-%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0)**) :wink:
 
-### Lint 또는 Linter
-Coming soon
+### Lint 또는 Linter란?
+> 린트(lint) 또는 린터(linter)는 소스 코드를 분석하여 **<ins>프로그램 오류, 버그, 스타일 오류, 의심스러운 구조체에</ins>** 표시(flag)를 달아놓기 위한 도구들을 가리킨다. 이 용어는 C 언어 소스 코드를 검사하는 유닉스 유틸리티에서 기원한다. - *[린트 (소프트웨어) from Wikipedia](https://ko.wikipedia.org/wiki/%EB%A6%B0%ED%8A%B8_(%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4))*
+
+쉽게 말해, 린트는 코딩 컨벤션(Coding convention)과 에러를 체크해 주는 프로그램으로 아래와 같은 사항을 체크해줍니다. 
+
+Staticcheck's [Checks](https://staticcheck.io/docs/checks):
+- Code simplifications
+- Various misuses of the standard library
+- Concurrency issues
+- Testing issues
+- Code that isn't really doing anything
+- Correctness issues
+- Performance issues
+- Dubious code constructs that have a high probability of being wrong
+- Stylistic issues
+
+제 저장소에 적용했을때 아래와 같은 사항을 수정할 수 있었습니다.
+
+- Write() function 호출 후 error(예외처리)처리 누락
+- 비어 있는 if 또는 else 구문
+- 불필요한 the blank identifier의 사용(예, _ )
 
 ## GitHub Actions을 통한 Golang CI 시작하기
 1. Test codes 준비
