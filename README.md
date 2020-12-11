@@ -6,7 +6,13 @@
 
 코드 변경 사항 통합을 자동화 하기 위하여 CI는 오픈소스 프로젝트에 꼭 적용해야합니다. 몇 명의 메인테이너(Maintainer)들이 모든 컨트리뷰션(Contribution)을 일일히 대응하기 어렵기 때문입니다. 
 
-**"GitHub Actions"은** 여러분의 (공공) 저장소에 CI 적용하기 위해 도움을 줄 것 입니다. 무료입니다!!
+**"GitHub Actions"은** 여러분의 (공공) 저장소에 CI 적용하기 위해 큰 도움이 될 것이라고 생각합니다. 무료라서 좋네요 :smile:
+
+## CI 관련 개념 설명
+GitHub Actions을 활용한 Golang CI를 시작하기에 앞서 몇가지 개념을 설명하고자 합니다. 모두 아는 내용이라면 Jump to [GitHub Actions을 통한 Golang CI 시작하기](https://github.com/hermitkim1/golang-ci-demo-by-github-actions#github-actions%EC%9D%84-%ED%86%B5%ED%95%9C-golang-ci-%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0) :wink:
+
+### Lint 또는 Linter
+Coming soon
 
 ## GitHub Actions을 통한 Golang CI 시작하기
 1. Test codes 준비
