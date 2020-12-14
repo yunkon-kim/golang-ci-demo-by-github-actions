@@ -17,9 +17,9 @@ GitHub Actions을 활용한 Golang CI를 시작하기에 앞서 몇가지 개념
 ### Lint 또는 Linter란?
 > 린트(lint) 또는 린터(linter)는 소스 코드를 분석하여 **<ins>프로그램 오류, 버그, 스타일 오류, 의심스러운 구조체에</ins>** 표시(flag)를 달아놓기 위한 도구들을 가리킨다. 이 용어는 C 언어 소스 코드를 검사하는 유닉스 유틸리티에서 기원한다. - *[린트 (소프트웨어) from Wikipedia](https://ko.wikipedia.org/wiki/%EB%A6%B0%ED%8A%B8_(%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4))*
 
-쉽게 말해, 린트는 코딩 컨벤션(Coding convention)과 에러를 체크해 주는 프로그램으로 아래와 같은 사항을 체크해줍니다. 
+**<ins>쉽게 말해, 린트는 코딩 컨벤션(Coding convention)과 에러를 체크해 주는 프로그램 입니다.</ins>** 아래와 같은 사항도 체크해주니 탄탄한 SW 개발을 위해서 꼭 적용해야 할 것 같네요 :wink:
 
-Staticcheck's [Checks](https://staticcheck.io/docs/checks):
+[참고] Staticcheck's [Checks](https://staticcheck.io/docs/checks):
 - Code simplifications
 - Various misuses of the standard library
 - Concurrency issues
@@ -30,11 +30,41 @@ Staticcheck's [Checks](https://staticcheck.io/docs/checks):
 - Dubious code constructs that have a high probability of being wrong
 - Stylistic issues
 
-제 저장소에 적용했을때 아래와 같은 사항을 수정할 수 있었습니다.
+저는 제 저장소에 린트를 적용하고, 아래와 같은 사항을 수정할 수 있었습니다.
 
 - Write() function 호출 후 error(예외처리)처리 누락
 - 비어 있는 if 또는 else 구문
 - 불필요한 the blank identifier의 사용(예, _ )
+
+### `matrix`란?
+**<ins>`matrix`는 동시에 여러 환경에서 테스트를 진행하고 싶을 때 유용하게 쓸 수 있는 GitHub Actions의 Workflow을 위한 YAML syntax(문법)입니다.</ins>**
+
+예를 들어, 개발한 프로그램을 Golang 1.13.x, 1.15.x 두 버전으로 ubuntu-18.04, macos-latest, windows-latest 세가지 OS 상에서 테스트 하고 싶은 경우 아래 예제 1과 같이 `matrix`를 사용하면 편리합니다.
+
+`strategy`아래에 `matrix`를 선언한 후, 사용시 `${{matrix.os}}`, `${{matrix.go-servion}}`과 같이 사용할 수 있습니다. 자세한 사용방법은 아래 예제 1, 2를 참고 바랍니다.
+
+예제 1:
+```yaml
+    strategy:
+      matrix:
+        go-version: [1.13.x, 1.15.x]
+        os: [ubuntu-18.04, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+```
+
+예제 2:
+```yaml
+strategy:
+  matrix:
+    node: [6, 8, 10]
+steps:
+  # Configures the node version used on GitHub-hosted runners
+  - uses: actions/setup-node@v1
+    with:
+      # The Node.js version to configure
+      node-version: ${{ matrix.node }}
+```
+
 
 ## GitHub Actions을 통한 Golang CI 시작하기
 1. Test codes 준비
@@ -83,7 +113,9 @@ func TestSum(t *testing.T) {
 GitHub Actions에서 제공하는 스타터 워크플로우를 사용하였고, 이해가 쉽도록 주석을 추가하였습니다.
 
 ```yaml
-name: Go
+# The name of your workflow. GitHub displays the names of your workflows on your repository's actions page. 
+# If you omit name, GitHub sets it to the workflow file path relative to the root of the repository.
+name: Golang CI
 
 # This workflow is triggered on push to default branch and on pull reqeusts to default branch.
 on:
@@ -95,11 +127,11 @@ on:
 jobs:
   # Set the job key. The key is displayed as the job name
   # when a job name is not provided
-  # The job key is "ci-demo"
-  ci-demo:
+  # The job key is "build-and-test"
+  build-and-test:
   
-    # Job name is "Build"
-    name: Build
+    # Job name is "Build and test"
+    name: Build and test
     
     # This job runs on Ubuntu-latest
     runs-on: ubuntu-latest
@@ -145,11 +177,56 @@ jobs:
 4. Pull Request (PR)을 생성함
 
 ## 향상된 워크플로우
+Cloud-Barista의 CB-Larva 저장소에서 아래 lint 워크 플로우를 테스트함(2020년 12월 11일)
+
+### lint
+```yaml
+# The name of your workflow. GitHub displays the names of your workflows on your repository's actions page. 
+# If you omit name, GitHub sets it to the workflow file path relative to the root of the repository.
+name: lint-on-push
+
+# This workflow is triggered on push
+on: 
+  push
+
+jobs:
+  # Set the job key. The key is displayed as the job name
+  # when a job name is not provided
+  # The job key is “lint"
+  lint:
+    # Job name is “xxx”
+    name: Lint
+
+    strategy:
+      matrix:
+        go-version: [1.15.x]
+        os: [ubuntu-18.04] #macos-latest, windows-latest
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
+        version: v1.29
+        
+        # Add args to skip dirs
+        args: --skip-dirs poc-cb-net/archive
+
+        # Optional: working directory, useful for monorepos
+        # working-directory: somedir
+
+        # Optional: golangci-lint command line arguments.
+        # args: --issues-exit-code=0
+
+        # Optional: show only new issues if it's a pull request. The default value is `false`.
+        # only-new-issues: true
+```
+
 추가 예정입니다 :)
-- Linting
-- Matrix
 - On comment and contain specific words
-- Test coverage
+- Code coverage
 - [Default environment variables](https://docs.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables)
 - [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows)
 - [Testing on all test files except for vendor packages](https://stackoverflow.com/questions/43507740/how-to-run-go-test-on-all-test-files-in-my-project-except-for-vendor-packages)
