@@ -36,6 +36,10 @@ GitHub Actions을 활용한 Golang CI를 시작하기에 앞서 몇가지 개념
 - 비어 있는 if 또는 else 구문
 - 불필요한 the blank identifier의 사용(예, _ )
 
+### Code Coverage란?
+TBD
+
+## GitHub Actions의 유용한 문법
 ### `matrix`란?
 **<ins>`matrix`는 동시에 여러 환경에서 테스트를 진행하고 싶을 때 유용하게 쓸 수 있는 GitHub Actions의 Workflow을 위한 YAML syntax(문법)입니다.</ins>**
 
