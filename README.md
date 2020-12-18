@@ -180,10 +180,9 @@ jobs:
 3. `calc.go`를 수정함
 4. Pull Request (PR)을 생성함
 
-## 향상된 워크플로우
-Cloud-Barista의 CB-Larva 저장소에서 아래 lint 워크 플로우를 테스트함(2020년 12월 11일)
-
+## 워크플로우를 위한 유용한 Jobs 
 ### lint
+Cloud-Barista의 CB-Larva 저장소에서 아래 lint 워크 플로우를 테스트함(2020년 12월 11일)
 ```yaml
 # The name of your workflow. GitHub displays the names of your workflows on your repository's actions page. 
 # If you omit name, GitHub sets it to the workflow file path relative to the root of the repository.
