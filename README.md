@@ -190,14 +190,25 @@ name: lint-on-push
 
 # This workflow is triggered on push
 on: 
-  push
+  push:
+    # Ignoring branches
+    branches-ignore: 
+      # Push events to branches matching master
+      - 'master'
+      # Push events to branches matching develop
+      - 'develop'
+      
+    # Ignoring paths
+    paths-ignore:
+      # Push events to poc-cb-net/archive/**
+      - 'poc-cb-net/archive/**'    
 
 jobs:
   # Set the job key. The key is displayed as the job name
   # when a job name is not provided
   # The job key is “lint"
   lint:
-    # Job name is “xxx”
+    # Job name is “Lint”
     name: Lint
 
     strategy:
@@ -225,6 +236,7 @@ jobs:
 
         # Optional: show only new issues if it's a pull request. The default value is `false`.
         # only-new-issues: true
+
 ```
 
 추가 예정입니다 :)
