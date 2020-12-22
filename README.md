@@ -183,6 +183,7 @@ jobs:
 ## 워크플로우를 위한 유용한 Jobs 
 ### lint
 Cloud-Barista의 CB-Larva 저장소에서 아래 lint 워크 플로우를 테스트함(2020년 12월 11일)
+[lint-on-push.yml](https://github.com/cloud-barista/cb-larva/blob/master/.github/workflows/lint-on-push.yml) on master branch
 ```yaml
 # The name of your workflow. GitHub displays the names of your workflows on your repository's actions page. 
 # If you omit name, GitHub sets it to the workflow file path relative to the root of the repository.
@@ -237,6 +238,65 @@ jobs:
         # Optional: show only new issues if it's a pull request. The default value is `false`.
         # only-new-issues: true
 
+```
+
+### build
+Cloud-Barista의 CB-Larva 저장소에서 아래 build 워크 플로우를 테스트함(2020년 12월 22일)
+[build-on-pull-request.yml](https://github.com/cloud-barista/cb-larva/blob/develop/.github/workflows/build-on-pull-request.yml) on develop branch
+```
+# The name of your workflow. GitHub displays the names of your workflows on your repository's actions page.
+# If you omit name, GitHub sets it to the workflow file path relative to the root of the repository.
+name: build-on-pull-request
+
+# This workflow is triggered on pull request
+on:
+  pull_request:
+    branches: [ $default-branch, develop ]
+
+jobs:
+  # Set the job key. The key is displayed as the job name
+  # when a job name is not provided
+  # The job key is “build"
+  build:
+    # Job name is “Build”
+    name: Build
+
+    strategy:
+      matrix:
+        go-version: [ 1.15.x ]
+        os: [ ubuntu-18.04 ] #macos-latest, windows-latest
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # This action sets up a go environment for use in actions by:
+      #     optionally downloading and caching a version of Go by version and adding to PATH
+      #     registering problem matchers for error output
+      # This step uses GitHub's setup-go: https://github.com/actions/setup-go
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+        id: go
+
+      # This action checks-out your repository under $GITHUB_WORKSPACE, so your workflow can access it.
+      # This step uses GitHub's checkout: https://github.com/actions/checkout
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      # This step installs dependencies
+      #      - name: Get dependencies
+      #        run: |
+      #          go get -v -t -d ./...
+      #          if [ -f Gopkg.toml ]; then
+      #              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+      #              dep ensure
+      #          fi
+
+      # This step builds source codes
+      - name: Build
+        run: |
+          go build -v ./poc-cb-net/cmd/agent
+          go build -v ./poc-cb-net/cmd/server
 ```
 
 추가 예정입니다 :)
