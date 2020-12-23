@@ -1,6 +1,6 @@
 *Read this in other languages: [한국어](https://github.com/hermitkim1/golang-ci-demo-by-github-actions/blob/master/README.md), [English](https://github.com/hermitkim1/golang-ci-demo-by-github-actions/blob/master/README.EN.md)*
 
-# Golang CI Demo by GitHub Actions
+# Golang CI by GitHub Actions
 
 > (번역) CI (Continuous Integration)는 여러 기여자의 코드 변경 사항을 단일 소프트웨어 프로젝트로 통합하는 것을 자동화하는 방법입니다. - *[Atlassian](https://www.atlassian.com/)*
 
@@ -10,71 +10,18 @@
 
 GitHub Actions가 무료라서 좋네요 :smile:
 
-## CI 관련 개념 설명
-GitHub Actions을 활용한 Golang CI를 시작하기에 앞서 몇가지 개념을 설명하고자 합니다.   
-(모두 아는 내용이라면 **Jump to [GitHub Actions을 통한 Golang CI 시작하기](https://github.com/hermitkim1/golang-ci-demo-by-github-actions#github-actions%EC%9D%84-%ED%86%B5%ED%95%9C-golang-ci-%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0)**) :wink:
-
-### Lint 또는 Linter란?
-> 린트(lint) 또는 린터(linter)는 소스 코드를 분석하여 **<ins>프로그램 오류, 버그, 스타일 오류, 의심스러운 구조체에</ins>** 표시(flag)를 달아놓기 위한 도구들을 가리킨다. 이 용어는 C 언어 소스 코드를 검사하는 유닉스 유틸리티에서 기원한다. - *[린트 (소프트웨어) from Wikipedia](https://ko.wikipedia.org/wiki/%EB%A6%B0%ED%8A%B8_(%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4))*
-
-**<ins>쉽게 말해, 린트는 코딩 컨벤션(Coding convention)과 에러를 체크해 주는 프로그램 입니다.</ins>** 아래와 같은 사항도 체크해주니 탄탄한 SW 개발을 위해서 꼭 적용해야 할 것 같네요 :wink:
-
-[참고] Staticcheck's [Checks](https://staticcheck.io/docs/checks):
-- Code simplifications
-- Various misuses of the standard library
-- Concurrency issues
-- Testing issues
-- Code that isn't really doing anything
-- Correctness issues
-- Performance issues
-- Dubious code constructs that have a high probability of being wrong
-- Stylistic issues
-
-저는 제 저장소에 린트를 적용하고, 아래와 같은 사항을 수정할 수 있었습니다.
-
-- Write() function 호출 후 error(예외처리)처리 누락
-- 비어 있는 if 또는 else 구문
-- 불필요한 the blank identifier의 사용(예, _ )
-
-### Code Coverage란?
-TBD
-
-## GitHub Actions의 유용한 문법
-### `matrix`란?
-**<ins>`matrix`는 동시에 여러 환경에서 테스트를 진행하고 싶을 때 유용하게 쓸 수 있는 GitHub Actions의 Workflow을 위한 YAML syntax(문법)입니다.</ins>**
-
-예를 들어, 개발한 프로그램을 Golang 1.13.x, 1.15.x 두 버전으로 ubuntu-18.04, macos-latest, windows-latest 세가지 OS 상에서 테스트 하고 싶은 경우 아래 예제 1과 같이 `matrix`를 사용하면 편리합니다.
-
-`strategy`아래에 `matrix`를 선언한 후, 사용시 `${{matrix.os}}`, `${{matrix.go-servion}}`과 같이 사용할 수 있습니다. 자세한 사용방법은 아래 예제 1, 2를 참고 바랍니다.
-
-예제 1:
-```yaml
-    strategy:
-      matrix:
-        go-version: [1.13.x, 1.15.x]
-        os: [ubuntu-18.04, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-```
-
-예제 2:
-```yaml
-strategy:
-  matrix:
-    node: [6, 8, 10]
-steps:
-  # Configures the node version used on GitHub-hosted runners
-  - uses: actions/setup-node@v1
-    with:
-      # The Node.js version to configure
-      node-version: ${{ matrix.node }}
-```
-
-
 ## GitHub Actions을 통한 Golang CI 시작하기
-1. Test codes 준비
-2. GitHub Actions에서 CI workflow 설정
+"선 실습, 후 설명"으로 구성하였습니다. 매우 간단한 실습을 통해 전반적인 내용을 접한뒤에 후반부 설명을 보면 이해하기 쉬울 것 같아 이렇게 구성하였습니다.
 
-### Test codes 준비
+### 실습 진행 순서
+1. 이 저장소를 fork함 (아래 준비된 "Test codes"를 활용해 개인의 저장소에서 실습해보기 위해서)
+2. GitHub Actions에서 CI workflow 설정 (아래 준비된 "GitHub Actions에서 CI workflow 설정" 참고)
+3. 브랜치를 생성함
+4. `calc.go`를 수정함
+5. Pull Request (PR)을 생성함
+6. 결과 확인
+
+#### Test codes
 [여기](http://golang.site/go/article/115-Go-%EC%9C%A0%EB%8B%9B-%ED%85%8C%EC%8A%A4%ED%8A%B8)를 참고 바랍니다.
 
 가정: 아래 Sum function을 이미 가지고 있고, 이 코드를 단위 테스트(Unit test)하기를 원함
@@ -113,8 +60,10 @@ func TestSum(t *testing.T) {
 }
 ```
 
-### GitHub Actions에서 CI workflow 설정
-GitHub Actions에서 제공하는 스타터 워크플로우를 사용하였고, 이해가 쉽도록 주석을 추가하였습니다.
+#### GitHub Actions에서 CI workflow 설정
+설정하는 과정은 [여기](https://docs.github.com/en/free-pro-team@latest/actions/quickstart)를 참고바랍니다.
+
+GitHub Actions에서 제공하는 스타터 워크플로우에 이해가 쉽도록 주석을 추가하였습니다.
 
 ```yaml
 # The name of your workflow. GitHub displays the names of your workflows on your repository's actions page. 
@@ -174,11 +123,65 @@ jobs:
         run: go test -v .
 ```
 
-## 데모 순서
-1. 이 저장소를 fork함
-2. 브랜치를 생성함
-3. `calc.go`를 수정함
-4. Pull Request (PR)을 생성함
+
+## CI 관련 개념 설명
+GitHub Actions을 활용한 Golang CI를 시작하기에 앞서 몇가지 개념을 설명하고자 합니다.   
+(모두 아는 내용이라면 **Jump to [GitHub Actions을 통한 Golang CI 시작하기](https://github.com/hermitkim1/golang-ci-demo-by-github-actions#github-actions%EC%9D%84-%ED%86%B5%ED%95%9C-golang-ci-%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0)**) :wink:
+
+### Lint 또는 Linter란?
+> 린트(lint) 또는 린터(linter)는 소스 코드를 분석하여 **<ins>프로그램 오류, 버그, 스타일 오류, 의심스러운 구조체에</ins>** 표시(flag)를 달아놓기 위한 도구들을 가리킨다. 이 용어는 C 언어 소스 코드를 검사하는 유닉스 유틸리티에서 기원한다. - *[린트 (소프트웨어) from Wikipedia](https://ko.wikipedia.org/wiki/%EB%A6%B0%ED%8A%B8_(%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4))*
+
+**<ins>쉽게 말해, 린트는 코딩 컨벤션(Coding convention)과 에러를 체크해 주는 프로그램 입니다.</ins>** 아래와 같은 사항도 체크해주니 탄탄한 SW 개발을 위해서 꼭 적용해야 할 것 같네요 :wink:
+
+[참고] Staticcheck's [Checks](https://staticcheck.io/docs/checks):
+- Code simplifications
+- Various misuses of the standard library
+- Concurrency issues
+- Testing issues
+- Code that isn't really doing anything
+- Correctness issues
+- Performance issues
+- Dubious code constructs that have a high probability of being wrong
+- Stylistic issues
+
+저는 제 저장소에 린트를 적용하고, 아래와 같은 사항을 수정할 수 있었습니다.
+
+- Write() function 호출 후 error(예외처리)처리 누락
+- 비어 있는 if 또는 else 구문
+- 불필요한 the blank identifier의 사용(예, _ )
+
+### Code Coverage란?
+TBD
+
+## GitHub Actions의 유용한 문법
+### `matrix`란?
+**<ins>`matrix`는 동시에 여러 환경에서 테스트를 진행하고 싶을 때 유용하게 쓸 수 있는 GitHub Actions의 Workflow을 위한 YAML syntax(문법)입니다.</ins>**
+
+예를 들어, 개발한 프로그램을 Golang 1.13.x, 1.15.x 두 버전으로 ubuntu-18.04, macos-latest, windows-latest 세가지 OS 상에서 테스트 하고 싶은 경우 아래 예제 1과 같이 `matrix`를 사용하면 편리합니다.
+
+`strategy`아래에 `matrix`를 선언한 후, 사용시 `${{matrix.os}}`, `${{matrix.go-servion}}`과 같이 사용할 수 있습니다. 자세한 사용방법은 아래 예제 1, 2를 참고 바랍니다.
+
+예제 1:
+```yaml
+    strategy:
+      matrix:
+        go-version: [1.13.x, 1.15.x]
+        os: [ubuntu-18.04, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+```
+
+예제 2:
+```yaml
+strategy:
+  matrix:
+    node: [6, 8, 10]
+steps:
+  # Configures the node version used on GitHub-hosted runners
+  - uses: actions/setup-node@v1
+    with:
+      # The Node.js version to configure
+      node-version: ${{ matrix.node }}
+```
 
 ## 워크플로우를 위한 유용한 Jobs 
 ### lint
