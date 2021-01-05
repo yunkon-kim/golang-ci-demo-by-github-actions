@@ -185,7 +185,7 @@ steps:
 
 ## 워크플로우를 위한 유용한 Jobs 
 ### lint
-Cloud-Barista의 CB-Larva 저장소에서 아래 lint 워크 플로우를 테스트함(2020년 12월 11일)
+Cloud-Barista의 CB-Larva 저장소에서 아래 lint 워크 플로우를 테스트함(2021년 01월 05일)
 
 [lint-on-push.yml](https://github.com/cloud-barista/cb-larva/blob/master/.github/workflows/lint-on-push.yml) on master branch
 ```yaml
@@ -223,8 +223,22 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v2
-    - name: golangci-lint
+    - name: Checkout source code
+      uses: actions/checkout@v2
+    
+    - name: Install golangci-lint
+      run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.34.1      
+    
+    - name: Run golangci-lint
+      run: $(go env GOPATH)/bin/golangci-lint run --skip-dirs poc-cb-net/archive
+```
+
+아래 워크플로우는 잠시 보류됨   
+이유: `golangci/golangci-lint-action@v2`을 활용 시 `-out-format=github-actions`을 기본 매개변수로 넘기고 있는데 오류에 대한 파일명과 라인번호를 출력하지 않는 [이슈](https://github.com/golangci/golangci-lint-action/issues/119#issuecomment-738355857)가 있음
+```
+    - name: Checkout source code
+      uses: actions/checkout@v2
+    - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v2
       with:
         # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
@@ -241,8 +255,8 @@ jobs:
 
         # Optional: show only new issues if it's a pull request. The default value is `false`.
         # only-new-issues: true
-
 ```
+
 
 ### build
 Cloud-Barista의 CB-Larva 저장소에서 아래 build 워크 플로우를 테스트함(2020년 12월 22일)
