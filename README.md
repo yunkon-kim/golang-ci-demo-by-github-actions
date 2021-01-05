@@ -187,7 +187,7 @@ steps:
 ### lint
 Cloud-Barista의 CB-Larva 저장소에서 아래 lint 워크 플로우를 테스트함(2021년 01월 05일)
 
-[lint-on-push.yml](https://github.com/cloud-barista/cb-larva/blob/master/.github/workflows/lint-on-push.yml) on master branch
+`feature` 브랜치에서 테스트하였으며, `master` 또는 `develop` 브랜치에 미 적용 상태
 ```yaml
 # The name of your workflow. GitHub displays the names of your workflows on your repository's actions page. 
 # If you omit name, GitHub sets it to the workflow file path relative to the root of the repository.
