@@ -183,9 +183,21 @@ steps:
       node-version: ${{ matrix.node }}
 ```
 
+### GitHub Actions의 `github` context
+자세한 내용은 [여기](https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context)를 참고 바랍니다.
+
+유용한 몇가지 Context:
+- `github.repository`: The owner and repository name. For example, `Codertocat/Hello-World`.
+- `github.repository_owner`: The repository owner's name. For example, `Codertocat`.
+- `github.actor`: The login of the user that initiated the workflow run.
+- `github.workspace`: The default working directory for steps and the default location of your repository when using the checkout action.
+
+### GitHub Actions의 Environment variables
+[여기](https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables) 참고
+
 ## 워크플로우를 위한 유용한 Jobs 
-### lint
-Cloud-Barista의 CB-Larva 저장소에서 아래 lint 워크 플로우를 테스트함(2021년 01월 05일)
+### Lint
+Cloud-Barista의 CB-Larva 저장소에서 아래 워크플로우를 테스트함(2021년 01월 05일)
 
 `feature` 브랜치에서 테스트하였으며, `master` 또는 `develop` 브랜치에 미 적용 상태
 ```yaml
@@ -235,7 +247,7 @@ jobs:
 
 아래 워크플로우는 잠시 보류됨   
 이유: `golangci/golangci-lint-action@v2`을 활용 시 `-out-format=github-actions`을 기본 매개변수로 넘기고 있는데 오류에 대한 파일명과 라인번호를 출력하지 않는 [이슈](https://github.com/golangci/golangci-lint-action/issues/119#issuecomment-738355857)가 있음
-```
+```yaml
     - name: Checkout source code
       uses: actions/checkout@v2
     - name: Run golangci-lint
@@ -258,11 +270,11 @@ jobs:
 ```
 
 
-### build
-Cloud-Barista의 CB-Larva 저장소에서 아래 build 워크 플로우를 테스트함(2020년 12월 22일)
+### Build source code
+Cloud-Barista의 CB-Larva 저장소에서 아래 워크플로우를 테스트함(2020년 12월 22일)
 
 [build-on-pull-request.yml](https://github.com/cloud-barista/cb-larva/blob/develop/.github/workflows/build-on-pull-request.yml) on develop branch
-```
+```yaml
 # The name of your workflow. GitHub displays the names of your workflows on your repository's actions page.
 # If you omit name, GitHub sets it to the workflow file path relative to the root of the repository.
 name: build-on-pull-request
@@ -316,6 +328,127 @@ jobs:
         run: |
           go build -v ./poc-cb-net/cmd/agent
           go build -v ./poc-cb-net/cmd/server
+```
+
+### Build and push container image
+Cloud-Barista의 CB-Tumblebug 저장소에서 아래 워크플로우를 테스트함(2021년 01월 07일)
+- Multi-architecture를 위한 Container image를 빌드함
+- Multi-registry에 Container image를 푸시함
+
+
+```yaml
+# This workflow will build the container image and publish it to container registries.
+name: Build and publish container image
+
+# When its time to do a release do a full cross platform build for all supported
+# architectures and push all of them to Docker Hub and GitHub Container Registry (GHCR).
+# Only trigger on semver shaped tags.
+on:
+  # "Build" on pull request event
+  pull_request:
+    branches:
+      - master
+
+  # "Build and publish" on push event (It considers on merge PR event)
+  push:
+    branches: master
+    # [To be tested]
+    tags:
+      - "v*.*.*"
+
+jobs:
+  # The job key is "build-and-publish"
+  build-and-publish:
+    # Job name is "Build and publish"
+    name: Build and publish
+
+    # This job runs on Ubuntu-latest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Prepare tags
+        id: prep
+        env:
+          # TODO: Change variable to your repository name and image name.
+          DOCKER_REPO: cloudbaristaorg
+          IMAGE_NAME: cb-tumblebug
+        run: |
+          VERSION=edge
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          fi
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            VERSION=nightly
+          fi
+          DOCKER_IMAGE=$DOCKER_REPO/$IMAGE_NAME
+          DOCKER_TAGS="${DOCKER_IMAGE}:${VERSION}"
+          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}.*$ ]]; then
+            DOCKER_TAGS="$DOCKER_TAGS,${DOCKER_IMAGE}:latest"
+          fi
+          echo ::set-output name=docker-tags::${DOCKER_TAGS}
+          echo ${DOCKER_TAGS}
+          GHCR_IMAGE=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+          GHCR_TAGS="${GHCR_IMAGE}:${VERSION}"
+          if [[ $VERSION =~ ^v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}.*$ ]]; then
+            GHCR_TAGS="$GHCR_TAGS,${GHCR_IMAGE}:latest"
+          fi
+          echo ::set-output name=ghcr-tags::${GHCR_TAGS}
+          echo ${GHCR_TAGS}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          platforms: all
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # TODO: Create a PAT with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
+      # TODO: Enabling improved container support
+      # Link: https://docs.github.com/en/free-pro-team@latest/packages/guides/enabling-improved-container-support
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: ./
+          file: ./Dockerfile
+          target: prod
+          platforms: linux/amd64,linux/arm/v7,linux/arm64 # linux/386,linux/ppc64le,linux/s390x,linux/arm/v6
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ steps.prep.outputs.docker-tags }}
+            ${{ steps.prep.outputs.ghcr-tags }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
 ```
 
 추가 예정입니다 :)
