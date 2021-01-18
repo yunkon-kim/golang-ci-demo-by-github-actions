@@ -183,7 +183,7 @@ steps:
       node-version: ${{ matrix.node }}
 ```
 
-### GitHub Actions의 `github` context
+### `github` context
 자세한 내용은 [여기](https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context)를 참고 바랍니다.
 
 유용한 몇가지 Context:
@@ -192,8 +192,30 @@ steps:
 - `github.actor`: The login of the user that initiated the workflow run.
 - `github.workspace`: The default working directory for steps and the default location of your repository when using the checkout action.
 
-### GitHub Actions의 Environment variables
+### Environment variables
 [여기](https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables) 참고
+
+### The magic trick to skip workflow
+커밋(Commit) 메시지에서 `[skip ci]`를 인식하여 워크플로우를 수행하지 않을 수 있습니다.
+- `if: "!contains(github.event.head_commit.message, '[skip ci]')"`
+
+참고(How to): https://dev.to/epassaro/use-skip-ci-in-github-actions-1mnf
+
+```yaml
+jobs:
+  # The job key is "build-and-publish"
+  build-and-publish:
+    # Job name is "Build and publish"
+    name: Build and publish
+
+    # This job runs on Ubuntu-latest
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+```
 
 ## 워크플로우를 위한 유용한 Jobs 
 ### Lint
